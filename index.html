@@ -11,7 +11,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: #f8fafc;
       color: #0f172a;
-      line-height: 1.5;
+      line-height: 1.55;
       padding: 24px 16px 48px;
     }
     .wrap { max-width: 780px; margin: 0 auto; }
@@ -88,19 +88,27 @@
       border-bottom: 1px solid #f1f5f9;
       flex-wrap: wrap;
     }
-    .chore-row.checked { background: #eff6ff; }
+    .chore-row.checked { background: #f8fafc; }
     .chore-row:last-child { border-bottom: none; }
     .chore-left { display: flex; align-items: flex-start; gap: 12px; min-width: 200px; flex: 1; }
     .chore-left input[type="checkbox"] {
       width: 18px;
       height: 18px;
-      margin-top: 2px;
-      accent-color: #2563eb;
+      margin-top: 3px;
       cursor: pointer;
       flex-shrink: 0;
     }
-    .chore-title { font-size: 15px; font-weight: 600; color: #0f172a; cursor: pointer; }
-    .chore-meta { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .chore-title {
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 5px;
+      margin-left: -6px;
+      display: inline-block;
+    }
+    .chore-bn { font-size: 13px; color: #64748b; font-weight: 500; margin-left: 4px; }
+    .chore-meta { font-size: 12px; color: #64748b; margin-top: 3px; }
     .turn-highlight { color: #2563eb; font-weight: 600; }
     .btn {
       border: none;
@@ -134,20 +142,16 @@
       font-size: 13px;
       background: #fff;
     }
-    .preview-box {
-      padding: 16px 18px;
-      font-size: 13px;
-    }
-    .preview-subject { font-weight: 600; color: #0f172a; margin-bottom: 8px; }
+    .preview-box { padding: 16px 18px; font-size: 13px; }
+    .preview-subject { font-weight: 600; color: #0f172a; margin-bottom: 10px; }
     .preview-msg {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
       border-radius: 8px;
-      padding: 12px;
-      white-space: pre-wrap;
-      color: #334155;
+      padding: 14px;
+      color: #0f172a;
       font-size: 13px;
-      line-height: 1.55;
+      line-height: 1.65;
     }
     .status {
       padding: 12px 16px;
@@ -158,11 +162,7 @@
     }
     .status.ok { display: block; background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
     .status.err { display: block; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
-    .log-item {
-      padding: 12px 18px;
-      border-bottom: 1px solid #f1f5f9;
-      font-size: 13px;
-    }
+    .log-item { padding: 12px 18px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
     .log-item:last-child { border-bottom: none; }
     .log-meta { font-size: 12px; color: #64748b; margin-top: 2px; }
     .empty { padding: 20px 18px; font-size: 13px; color: #94a3b8; text-align: center; }
@@ -176,8 +176,8 @@
         <div class="sub" id="activeBanner"></div>
       </div>
       <div class="switcher" role="group" aria-label="Select who you are">
-        <button id="btnUserA" onclick="setUser('A')">Arif</button>
-        <button id="btnUserB" onclick="setUser('B')">Ishak</button>
+        <button id="btnUserA" onclick="setUser('A')">I am Person A</button>
+        <button id="btnUserB" onclick="setUser('B')">I am Person B</button>
       </div>
     </header>
 
@@ -185,11 +185,11 @@
 
     <div class="stats">
       <div class="stat">
-        <div class="stat-label">Arif Done</div>
+        <div class="stat-label">Person A Done</div>
         <div class="stat-val" id="statA">0</div>
       </div>
       <div class="stat">
-        <div class="stat-label">Ishak Done</div>
+        <div class="stat-label">Person B Done</div>
         <div class="stat-val" id="statB">0</div>
       </div>
       <div class="stat">
@@ -201,7 +201,7 @@
     <div class="card">
       <div class="card-head">
         <h2>Daily Chores</h2>
-        <span class="sub">Tick boxes to build the message live, or click Done &amp; Notify</span>
+        <span class="sub">Tick boxes to highlight &amp; build English + বাংলা message live</span>
       </div>
       <div id="choreList"></div>
       <div class="batch-bar">
@@ -216,7 +216,7 @@
 
     <div class="card">
       <div class="card-head">
-        <h2>Live Message Preview</h2>
+        <h2>Live Message Preview (English + বাংলা)</h2>
         <span class="sub" id="previewCount">No tasks ticked</span>
       </div>
       <div class="preview-box" id="previewBox"></div>
@@ -238,32 +238,50 @@
       templateId: "template_ol1efuh",
 
       emails: {
-        Arif: "hmarif315@gmail.com",
-        Ishak: "mdarifhasan171@gmail.com"
+        A: "hmarif315@gmail.com",
+        B: "mdarifhasan171@gmail.com"
       },
       names: {
-        Arif: "Arif",
-        Ishak: "Ishak"
+        A: "Person A",
+        B: "Person B"
       }
     };
 
     emailjs.init({ publicKey: CONFIG.publicKey });
 
     const DEFAULT_CHORES = [
-      { id: "trash", title: "Take Out the Trash", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
-      { id: "sweep", title: "Sweep the Room", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
-      { id: "basin", title: "Clean the Basin", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
-      { id: "washroom", title: "Clean the Washroom", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
-      { id: "water", title: "Bring Water", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 }
+      { id: "trash", title: "Take Out the Trash", bnTitle: "ময়লা ফেলা", colorHex: "#b45309", bgHex: "#fef3c7", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
+      { id: "sweep", title: "Sweep the Room", bnTitle: "ঘর ঝাড়ু দেওয়া", colorHex: "#1d4ed8", bgHex: "#dbeafe", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
+      { id: "basin", title: "Clean the Basin", bnTitle: "বেসিন পরিষ্কার করা", colorHex: "#0f766e", bgHex: "#ccfbf1", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
+      { id: "washroom", title: "Clean the Washroom", bnTitle: "ওয়াশরুম পরিষ্কার করা", colorHex: "#4338ca", bgHex: "#e0e7ff", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
+      { id: "water", title: "Bring Water", bnTitle: "পানি আনা", colorHex: "#0369a1", bgHex: "#e0f2fe", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 }
     ];
 
     let activeUser = localStorage.getItem("fs_user") === "B" ? "B" : "A";
-    let chores = JSON.parse(localStorage.getItem("fs_chores") || "null") || DEFAULT_CHORES;
+    let savedChores = JSON.parse(localStorage.getItem("fs_chores") || "null");
+    let chores = Array.isArray(savedChores) && savedChores.length
+      ? DEFAULT_CHORES.map((base) => {
+          const found = savedChores.find((x) => x.id === base.id) || {};
+          return Object.assign({}, base, found, {
+            bnTitle: base.bnTitle,
+            colorHex: base.colorHex,
+            bgHex: base.bgHex
+          });
+        })
+      : DEFAULT_CHORES;
     let logs = JSON.parse(localStorage.getItem("fs_logs") || "[]");
     let checkedIds = new Set();
     let busy = false;
 
     function partnerOf(u) { return u === "A" ? "B" : "A"; }
+    function escHtml(s) {
+      return String(s).replace(/[&<>"']/g, (m) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[m]));
+    }
+    function hiSpan(text, colorHex, bgHex) {
+      return '<span style="color:' + colorHex + ';background-color:' + bgHex + ';padding:2px 7px;border-radius:4px;font-weight:700;">' + escHtml(text) + '</span>';
+    }
     function saveState() {
       localStorage.setItem("fs_user", activeUser);
       localStorage.setItem("fs_chores", JSON.stringify(chores));
@@ -276,29 +294,81 @@
       el.className = "status " + (isErr ? "err" : "ok");
     }
 
-    function buildMessage(titles, note, nowStr) {
+    function buildMessage(selectedItems, note, nowStr) {
       const partner = partnerOf(activeUser);
       const actorName = CONFIG.names[activeUser];
       const partnerName = CONFIG.names[partner];
-      const joined = titles.length <= 2 ? titles.join(" & ") : titles.slice(0, 2).join(", ") + " +" + (titles.length - 2) + " more";
-      const subject = titles.length === 1
-        ? "FairShare: " + titles[0] + " completed — Next it's your turn!"
+      const isSingle = selectedItems.length === 1;
+      const joined = selectedItems.length <= 2
+        ? selectedItems.map((i) => i.title).join(" & ")
+        : selectedItems.slice(0, 2).map((i) => i.title).join(", ") + " +" + (selectedItems.length - 2) + " more";
+
+      const subject = isSingle
+        ? "FairShare: " + selectedItems[0].title + " (" + selectedItems[0].bnTitle + ") — Next it's your turn!"
         : "FairShare: " + joined + " completed — Next it's your turn!";
 
-      const message = titles.length === 1
+      const enPlain = isSingle
         ? "Hi " + partnerName + ",\n\n" +
-          "I have completed \"" + titles[0] + "\" today (" + nowStr + ").\n" +
+          "I have completed [" + selectedItems[0].title + "] today (" + nowStr + ").\n" +
           (note ? "Note: " + note + "\n" : "") +
-          "Next time, it's your turn for " + titles[0] + "!\n\n" +
-          "— " + actorName + " (FairShare)"
+          "Next time, it's your turn for [" + selectedItems[0].title + "]!"
         : "Hi " + partnerName + ",\n\n" +
           "I have completed the following tasks today (" + nowStr + "):\n" +
-          titles.map((t) => "- " + t).join("\n") + "\n" +
+          selectedItems.map((i) => "• " + i.title).join("\n") + "\n" +
           (note ? "\nNote: " + note + "\n" : "") +
-          "\nNext time, it's your turn for these tasks!\n\n" +
+          "\nNext time, it's your turn for these tasks!";
+
+      const bnPlain = isSingle
+        ? "হ্যালো " + partnerName + ",\n\n" +
+          "আমি আজকে [" + selectedItems[0].bnTitle + "] (" + selectedItems[0].title + ") কাজটি সম্পন্ন করেছি (" + nowStr + ")।\n" +
+          (note ? "নোট: " + note + "\n" : "") +
+          "পরের বার [" + selectedItems[0].bnTitle + "] করার পালা তোমার!\n\n" +
+          "— " + actorName + " (FairShare)"
+        : "হ্যালো " + partnerName + ",\n\n" +
+          "আমি আজকে নিচের কাজগুলো সম্পন্ন করেছি (" + nowStr + "):\n" +
+          selectedItems.map((i) => "• " + i.bnTitle + " (" + i.title + ")").join("\n") + "\n" +
+          (note ? "\nনোট: " + note + "\n" : "") +
+          "\nপরের বার এই কাজগুলো করার পালা তোমার!\n\n" +
           "— " + actorName + " (FairShare)";
 
-      return { subject, message };
+      const message = enPlain + "\n\n──────── বাংলা অনুবাদ ────────\n\n" + bnPlain;
+
+      const enHtml = isSingle
+        ? '<p style="margin:0 0 8px 0;">Hi ' + escHtml(partnerName) + ',</p>' +
+          '<p style="margin:0 0 8px 0;">I have completed ' + hiSpan(selectedItems[0].title, selectedItems[0].colorHex, selectedItems[0].bgHex) + ' today (' + escHtml(nowStr) + ').</p>' +
+          (note ? '<p style="margin:0 0 8px 0;color:#475569;"><strong>Note:</strong> ' + escHtml(note) + '</p>' : '') +
+          '<p style="margin:0;">Next time, it\'s your turn for ' + hiSpan(selectedItems[0].title, selectedItems[0].colorHex, selectedItems[0].bgHex) + '!</p>'
+        : '<p style="margin:0 0 8px 0;">Hi ' + escHtml(partnerName) + ',</p>' +
+          '<p style="margin:0 0 8px 0;">I have completed the following tasks today (' + escHtml(nowStr) + '):</p>' +
+          '<ul style="margin:0 0 10px 18px;padding:0;">' +
+            selectedItems.map((i) => '<li style="margin:5px 0;">' + hiSpan(i.title, i.colorHex, i.bgHex) + '</li>').join('') +
+          '</ul>' +
+          (note ? '<p style="margin:0 0 8px 0;color:#475569;"><strong>Note:</strong> ' + escHtml(note) + '</p>' : '') +
+          '<p style="margin:0;">Next time, it\'s your turn for these tasks!</p>';
+
+      const bnHtml = isSingle
+        ? '<p style="margin:0 0 8px 0;">হ্যালো ' + escHtml(partnerName) + ',</p>' +
+          '<p style="margin:0 0 8px 0;">আমি আজকে ' + hiSpan(selectedItems[0].bnTitle, selectedItems[0].colorHex, selectedItems[0].bgHex) + ' (' + escHtml(selectedItems[0].title) + ') কাজটি সম্পন্ন করেছি (' + escHtml(nowStr) + ')।</p>' +
+          (note ? '<p style="margin:0 0 8px 0;color:#475569;"><strong>নোট:</strong> ' + escHtml(note) + '</p>' : '') +
+          '<p style="margin:0;">পরের বার ' + hiSpan(selectedItems[0].bnTitle, selectedItems[0].colorHex, selectedItems[0].bgHex) + ' করার পালা তোমার!</p>'
+        : '<p style="margin:0 0 8px 0;">হ্যালো ' + escHtml(partnerName) + ',</p>' +
+          '<p style="margin:0 0 8px 0;">আমি আজকে নিচের কাজগুলো সম্পন্ন করেছি (' + escHtml(nowStr) + '):</p>' +
+          '<ul style="margin:0 0 10px 18px;padding:0;">' +
+            selectedItems.map((i) => '<li style="margin:5px 0;">' + hiSpan(i.bnTitle, i.colorHex, i.bgHex) + ' <span style="color:#64748b;">(' + escHtml(i.title) + ')</span></li>').join('') +
+          '</ul>' +
+          (note ? '<p style="margin:0 0 8px 0;color:#475569;"><strong>নোট:</strong> ' + escHtml(note) + '</p>' : '') +
+          '<p style="margin:0;">পরের বার এই কাজগুলো করার পালা তোমার!</p>';
+
+      const messageHtml =
+        '<div style="font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;font-size:14px;line-height:1.65;color:#0f172a;">' +
+          enHtml +
+          '<hr style="border:none;border-top:1px solid #e2e8f0;margin:14px 0;" />' +
+          '<div style="font-size:12px;font-weight:700;color:#64748b;margin-bottom:6px;">বাংলা অনুবাদ</div>' +
+          bnHtml +
+          '<p style="margin:12px 0 0 0;color:#64748b;font-size:12px;">— ' + escHtml(actorName) + ' (FairShare)</p>' +
+        '</div>';
+
+      return { subject, message, messageHtml };
     }
 
     window.setUser = function (u) {
@@ -314,21 +384,21 @@
     };
 
     window.renderPreview = function () {
-      const selected = chores.filter((c) => checkedIds.has(c.id)).map((c) => c.title);
+      const selected = chores.filter((c) => checkedIds.has(c.id));
       const partner = partnerOf(activeUser);
       const countEl = document.getElementById("previewCount");
       const boxEl = document.getElementById("previewBox");
       if (selected.length === 0) {
         countEl.textContent = "No tasks ticked";
-        boxEl.innerHTML = '<div class="sub">Tick any chore box above to see the completion message for ' + CONFIG.emails[partner] + '.</div>';
+        boxEl.innerHTML = '<div class="sub">Jei box-e tick diben, sei kajer nam color-highlight kore English + বাংলা message ekhane dekha jabe (' + escHtml(CONFIG.emails[partner]) + ').</div>';
         return;
       }
       countEl.textContent = selected.length + " task" + (selected.length > 1 ? "s" : "") + " selected";
       const note = document.getElementById("noteInput").value.trim();
       const built = buildMessage(selected, note, new Date().toLocaleString());
       boxEl.innerHTML =
-        '<div class="preview-subject">Subject: ' + built.subject.replace(/</g, "&lt;") + '</div>' +
-        '<div class="preview-msg">' + built.message.replace(/</g, "&lt;") + '</div>';
+        '<div class="preview-subject">Subject: ' + escHtml(built.subject) + '</div>' +
+        '<div class="preview-msg">' + built.messageHtml + '</div>';
     };
 
     async function dispatchTasks(taskIds) {
@@ -343,9 +413,10 @@
       const replyTo = CONFIG.emails[activeUser];
       const selectedChores = chores.filter((c) => taskIds.includes(c.id));
       const titles = selectedChores.map((c) => c.title);
+      const bnTitles = selectedChores.map((c) => c.bnTitle);
       const note = document.getElementById("noteInput").value.trim();
       const nowStr = new Date().toLocaleString();
-      const built = buildMessage(titles, note, nowStr);
+      const built = buildMessage(selectedChores, note, nowStr);
       const taskList = titles.join(", ");
 
       try {
@@ -360,11 +431,13 @@
           subject: built.subject,
           title: built.subject,
           message: built.message,
+          message_html: built.messageHtml,
           msg: built.message,
           body: built.message,
           text: built.message,
           task: taskList,
           tasks: taskList,
+          task_bn: bnTitles.join(", "),
           task_name: taskList,
           chore: taskList,
           chores: taskList,
@@ -378,14 +451,13 @@
 
         chores = chores.map((c) => {
           if (!taskIds.includes(c.id)) return c;
-          return {
-            ...c,
+          return Object.assign({}, c, {
             nextTurn: partner,
             lastDoneBy: activeUser,
             lastDoneAt: new Date().toISOString(),
             countA: c.countA + (activeUser === "A" ? 1 : 0),
             countB: c.countB + (activeUser === "B" ? 1 : 0)
-          };
+          });
         });
 
         logs.unshift({
@@ -420,19 +492,9 @@
       }
     }
 
-    window.markSingleDone = function (id) {
-      dispatchTasks([id]);
-    };
-
-    window.submitChecked = function () {
-      dispatchTasks(Array.from(checkedIds));
-    };
-
-    window.clearLogs = function () {
-      logs = [];
-      saveState();
-      render();
-    };
+    window.markSingleDone = function (id) { dispatchTasks([id]); };
+    window.submitChecked = function () { dispatchTasks(Array.from(checkedIds)); };
+    window.clearLogs = function () { logs = []; saveState(); render(); };
 
     function render() {
       const partner = partnerOf(activeUser);
@@ -454,15 +516,19 @@
           : "Not logged yet";
         const turnName = CONFIG.names[c.nextTurn];
         const isYourTurn = c.nextTurn === activeUser;
+        const titleStyle = isChecked
+          ? "color:" + c.colorHex + ";background:" + c.bgHex + ";"
+          : "color:" + c.colorHex + ";";
         return (
           '<div class="chore-row' + (isChecked ? ' checked' : '') + '">' +
             '<div class="chore-left">' +
-              '<input type="checkbox" id="chk_' + c.id + '" ' + (isChecked ? 'checked' : '') + ' onchange="toggleCheck(\'' + c.id + '\')" />' +
+              '<input type="checkbox" style="accent-color:' + c.colorHex + '" id="chk_' + c.id + '" ' + (isChecked ? 'checked' : '') + ' onchange="toggleCheck(\'' + c.id + '\')" />' +
               '<div>' +
-                '<label class="chore-title" for="chk_' + c.id + '">' + c.title + '</label>' +
+                '<label class="chore-title" style="' + titleStyle + '" for="chk_' + c.id + '">' + escHtml(c.title) + '</label>' +
+                '<span class="chore-bn">· ' + escHtml(c.bnTitle) + '</span>' +
                 '<div class="chore-meta">' +
-                  '<span class="' + (isYourTurn ? 'turn-highlight' : '') + '">Next turn: ' + turnName + '</span>' +
-                  ' · ' + lastInfo +
+                  '<span class="' + (isYourTurn ? 'turn-highlight' : '') + '">Next turn: ' + escHtml(turnName) + '</span>' +
+                  ' · ' + escHtml(lastInfo) +
                   ' · A: ' + c.countA + ' / B: ' + c.countB +
                 '</div>' +
               '</div>' +
@@ -488,10 +554,10 @@
       } else {
         logEl.innerHTML = logs.slice(0, 15).map((l) => (
           '<div class="log-item">' +
-            '<div><strong>' + l.by + '</strong> completed: ' + l.tasks.join(", ") + '</div>' +
+            '<div><strong>' + escHtml(l.by) + '</strong> completed: ' + escHtml(l.tasks.join(", ")) + '</div>' +
             '<div class="log-meta">' +
-              l.time + ' · Notified ' + l.notified + ' · ' +
-              (l.ok ? '<span style="color:#15803d;font-weight:600">Sent</span>' : '<span style="color:#dc2626;font-weight:600">Failed: ' + (l.err || '') + '</span>') +
+              escHtml(l.time) + ' · Notified ' + escHtml(l.notified) + ' · ' +
+              (l.ok ? '<span style="color:#15803d;font-weight:600">Sent</span>' : '<span style="color:#dc2626;font-weight:600">Failed: ' + escHtml(l.err || '') + '</span>') +
             '</div>' +
           '</div>'
         )).join("");
