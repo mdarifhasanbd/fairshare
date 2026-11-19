@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FairShare — Roommate Chore Tracker</title>
+  <title>FairShare — Roommate Chore Tracker (Arif &amp; Ishak)</title>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -176,8 +176,8 @@
         <div class="sub" id="activeBanner"></div>
       </div>
       <div class="switcher" role="group" aria-label="Select who you are">
-        <button id="btnUserA" onclick="setUser('A')">I am Person A</button>
-        <button id="btnUserB" onclick="setUser('B')">I am Person B</button>
+        <button id="btnUserA" onclick="setUser('A')">I am Arif</button>
+        <button id="btnUserB" onclick="setUser('B')">I am Ishak</button>
       </div>
     </header>
 
@@ -185,11 +185,11 @@
 
     <div class="stats">
       <div class="stat">
-        <div class="stat-label">Person A Done</div>
+        <div class="stat-label">Arif Done</div>
         <div class="stat-val" id="statA">0</div>
       </div>
       <div class="stat">
-        <div class="stat-label">Person B Done</div>
+        <div class="stat-label">Ishak Done</div>
         <div class="stat-val" id="statB">0</div>
       </div>
       <div class="stat">
@@ -201,7 +201,7 @@
     <div class="card">
       <div class="card-head">
         <h2>Daily Chores</h2>
-        <span class="sub">Tick boxes to highlight &amp; build English + বাংলা message live</span>
+        <span class="sub">Tick boxes to highlight &amp; preview polite English + বাংলা message</span>
       </div>
       <div id="choreList"></div>
       <div class="batch-bar">
@@ -216,7 +216,7 @@
 
     <div class="card">
       <div class="card-head">
-        <h2>Live Message Preview (English + বাংলা)</h2>
+        <h2>Live Message Preview (English + বাংলা অর্থ)</h2>
         <span class="sub" id="previewCount">No tasks ticked</span>
       </div>
       <div class="preview-box" id="previewBox"></div>
@@ -242,19 +242,19 @@
         B: "mdarifhasan171@gmail.com"
       },
       names: {
-        A: "Person A",
-        B: "Person B"
+        A: "Arif",
+        B: "Ishak"
       }
     };
 
     emailjs.init({ publicKey: CONFIG.publicKey });
 
     const DEFAULT_CHORES = [
-      { id: "trash", title: "Take Out the Trash", bnTitle: "ময়লা ফেলা", colorHex: "#b45309", bgHex: "#fef3c7", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
-      { id: "sweep", title: "Sweep the Room", bnTitle: "ঘর ঝাড়ু দেওয়া", colorHex: "#1d4ed8", bgHex: "#dbeafe", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
-      { id: "basin", title: "Clean the Basin", bnTitle: "বেসিন পরিষ্কার করা", colorHex: "#0f766e", bgHex: "#ccfbf1", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
-      { id: "washroom", title: "Clean the Washroom", bnTitle: "ওয়াশরুম পরিষ্কার করা", colorHex: "#4338ca", bgHex: "#e0e7ff", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
-      { id: "water", title: "Bring Water", bnTitle: "পানি আনা", colorHex: "#0369a1", bgHex: "#e0f2fe", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 }
+      { id: "trash", title: "Take Out the Trash", actionLower: "take out the trash", bnTitle: "ময়লা ফেলা", bnGenitive: "ময়লা ফেলার", colorHex: "#b45309", bgHex: "#fef3c7", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
+      { id: "sweep", title: "Sweep the Room", actionLower: "sweep the room", bnTitle: "ঘর ঝাড়ু দেওয়া", bnGenitive: "ঘর ঝাড়ু দেওয়ার", colorHex: "#1d4ed8", bgHex: "#dbeafe", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
+      { id: "basin", title: "Clean the Basin", actionLower: "clean the basin", bnTitle: "বেসিন পরিষ্কার", bnGenitive: "বেসিন পরিষ্কারের", colorHex: "#0f766e", bgHex: "#ccfbf1", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
+      { id: "washroom", title: "Clean the Washroom", actionLower: "clean the washroom", bnTitle: "ওয়াশরুম পরিষ্কার", bnGenitive: "ওয়াশরুম পরিষ্কারের", colorHex: "#4338ca", bgHex: "#e0e7ff", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
+      { id: "water", title: "Bring Water", actionLower: "bring water", bnTitle: "পানি আনা", bnGenitive: "পানি আনার", colorHex: "#0369a1", bgHex: "#e0f2fe", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 }
     ];
 
     let activeUser = localStorage.getItem("fs_user") === "B" ? "B" : "A";
@@ -263,7 +263,9 @@
       ? DEFAULT_CHORES.map((base) => {
           const found = savedChores.find((x) => x.id === base.id) || {};
           return Object.assign({}, base, found, {
+            actionLower: base.actionLower,
             bnTitle: base.bnTitle,
+            bnGenitive: base.bnGenitive,
             colorHex: base.colorHex,
             bgHex: base.bgHex
           });
@@ -281,6 +283,12 @@
     }
     function hiSpan(text, colorHex, bgHex) {
       return '<span style="color:' + colorHex + ';background-color:' + bgHex + ';padding:2px 7px;border-radius:4px;font-weight:700;">' + escHtml(text) + '</span>';
+    }
+    function formatPoliteDateTime() {
+      const d = new Date();
+      const datePart = d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+      const timePart = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+      return datePart + ", at " + timePart;
     }
     function saveState() {
       localStorage.setItem("fs_user", activeUser);
@@ -304,66 +312,72 @@
         : selectedItems.slice(0, 2).map((i) => i.title).join(", ") + " +" + (selectedItems.length - 2) + " more";
 
       const subject = isSingle
-        ? "FairShare: " + selectedItems[0].title + " (" + selectedItems[0].bnTitle + ") — Next it's your turn!"
-        : "FairShare: " + joined + " completed — Next it's your turn!";
+        ? "FairShare: " + selectedItems[0].title + " Completed — Kindly Your Turn Next"
+        : "FairShare: " + joined + " Completed — Kindly Your Turn Next";
 
       const enPlain = isSingle
-        ? "Hi " + partnerName + ",\n\n" +
-          "I have completed [" + selectedItems[0].title + "] today (" + nowStr + ").\n" +
+        ? "Assalamu Alaikum " + partnerName + ",\n" +
+          "I hope you’re doing well. Just wanted to let you know that I have completed [" + selectedItems[0].title + "] today (" + nowStr + ").\n" +
           (note ? "Note: " + note + "\n" : "") +
-          "Next time, it's your turn for [" + selectedItems[0].title + "]!"
-        : "Hi " + partnerName + ",\n\n" +
-          "I have completed the following tasks today (" + nowStr + "):\n" +
+          "Since I’ve taken care of it this time, you’ll kindly be the next one to " + selectedItems[0].actionLower + ". I would appreciate your cooperation.\n" +
+          "Thank you so much!\n— " + actorName
+        : "Assalamu Alaikum " + partnerName + ",\n" +
+          "I hope you’re doing well. Just wanted to let you know that I have completed the following tasks today (" + nowStr + "):\n" +
           selectedItems.map((i) => "• " + i.title).join("\n") + "\n" +
-          (note ? "\nNote: " + note + "\n" : "") +
-          "\nNext time, it's your turn for these tasks!";
+          (note ? "Note: " + note + "\n" : "") +
+          "Since I’ve taken care of them this time, you’ll kindly be the next one to handle these tasks. I would appreciate your cooperation.\n" +
+          "Thank you so much!\n— " + actorName;
 
       const bnPlain = isSingle
-        ? "হ্যালো " + partnerName + ",\n\n" +
-          "আমি আজকে [" + selectedItems[0].bnTitle + "] (" + selectedItems[0].title + ") কাজটি সম্পন্ন করেছি (" + nowStr + ")।\n" +
+        ? "আসসালামু আলাইকুম " + partnerName + ",\n" +
+          "আশা করি আপনি ভালো আছেন। আপনাকে জানাতে চাই যে, আজ আমি [" + selectedItems[0].bnGenitive + "] কাজটি সম্পন্ন করেছি (" + nowStr + ")।\n" +
           (note ? "নোট: " + note + "\n" : "") +
-          "পরের বার [" + selectedItems[0].bnTitle + "] করার পালা তোমার!\n\n" +
-          "— " + actorName + " (FairShare)"
-        : "হ্যালো " + partnerName + ",\n\n" +
-          "আমি আজকে নিচের কাজগুলো সম্পন্ন করেছি (" + nowStr + "):\n" +
+          "যেহেতু এবার আমি কাজটি করেছি, তাই পরবর্তীবার [" + selectedItems[0].bnGenitive + "] দায়িত্বটি আপনার থাকবে। এ বিষয়ে আপনার সহযোগিতা কামনা করছি।\n" +
+          "আপনাকে অনেক ধন্যবাদ।\n— " + actorName
+        : "আসসালামু আলাইকুম " + partnerName + ",\n" +
+          "আশা করি আপনি ভালো আছেন। আপনাকে জানাতে চাই যে, আজ আমি নিচের কাজগুলো সম্পন্ন করেছি (" + nowStr + "):\n" +
           selectedItems.map((i) => "• " + i.bnTitle + " (" + i.title + ")").join("\n") + "\n" +
-          (note ? "\nনোট: " + note + "\n" : "") +
-          "\nপরের বার এই কাজগুলো করার পালা তোমার!\n\n" +
-          "— " + actorName + " (FairShare)";
+          (note ? "নোট: " + note + "\n" : "") +
+          "যেহেতু এবার আমি কাজগুলো করেছি, তাই পরবর্তীবার এই কাজগুলোর দায়িত্বটি আপনার থাকবে। এ বিষয়ে আপনার সহযোগিতা কামনা করছি।\n" +
+          "আপনাকে অনেক ধন্যবাদ।\n— " + actorName;
 
-      const message = enPlain + "\n\n──────── বাংলা অনুবাদ ────────\n\n" + bnPlain;
+      const message = enPlain + "\n\nবাংলা অর্থ:\n" + bnPlain;
 
       const enHtml = isSingle
-        ? '<p style="margin:0 0 8px 0;">Hi ' + escHtml(partnerName) + ',</p>' +
-          '<p style="margin:0 0 8px 0;">I have completed ' + hiSpan(selectedItems[0].title, selectedItems[0].colorHex, selectedItems[0].bgHex) + ' today (' + escHtml(nowStr) + ').</p>' +
+        ? '<p style="margin:0 0 8px 0;">Assalamu Alaikum ' + escHtml(partnerName) + ',</p>' +
+          '<p style="margin:0 0 8px 0;">I hope you’re doing well. Just wanted to let you know that I have completed ' + hiSpan(selectedItems[0].title, selectedItems[0].colorHex, selectedItems[0].bgHex) + ' today (' + escHtml(nowStr) + ').</p>' +
           (note ? '<p style="margin:0 0 8px 0;color:#475569;"><strong>Note:</strong> ' + escHtml(note) + '</p>' : '') +
-          '<p style="margin:0;">Next time, it\'s your turn for ' + hiSpan(selectedItems[0].title, selectedItems[0].colorHex, selectedItems[0].bgHex) + '!</p>'
-        : '<p style="margin:0 0 8px 0;">Hi ' + escHtml(partnerName) + ',</p>' +
-          '<p style="margin:0 0 8px 0;">I have completed the following tasks today (' + escHtml(nowStr) + '):</p>' +
+          '<p style="margin:0 0 8px 0;">Since I’ve taken care of it this time, you’ll kindly be the next one to ' + hiSpan(selectedItems[0].actionLower, selectedItems[0].colorHex, selectedItems[0].bgHex) + '. I would appreciate your cooperation.</p>' +
+          '<p style="margin:0;">Thank you so much!</p>'
+        : '<p style="margin:0 0 8px 0;">Assalamu Alaikum ' + escHtml(partnerName) + ',</p>' +
+          '<p style="margin:0 0 8px 0;">I hope you’re doing well. Just wanted to let you know that I have completed the following tasks today (' + escHtml(nowStr) + '):</p>' +
           '<ul style="margin:0 0 10px 18px;padding:0;">' +
             selectedItems.map((i) => '<li style="margin:5px 0;">' + hiSpan(i.title, i.colorHex, i.bgHex) + '</li>').join('') +
           '</ul>' +
           (note ? '<p style="margin:0 0 8px 0;color:#475569;"><strong>Note:</strong> ' + escHtml(note) + '</p>' : '') +
-          '<p style="margin:0;">Next time, it\'s your turn for these tasks!</p>';
+          '<p style="margin:0 0 8px 0;">Since I’ve taken care of them this time, you’ll kindly be the next one to handle these tasks. I would appreciate your cooperation.</p>' +
+          '<p style="margin:0;">Thank you so much!</p>';
 
       const bnHtml = isSingle
-        ? '<p style="margin:0 0 8px 0;">হ্যালো ' + escHtml(partnerName) + ',</p>' +
-          '<p style="margin:0 0 8px 0;">আমি আজকে ' + hiSpan(selectedItems[0].bnTitle, selectedItems[0].colorHex, selectedItems[0].bgHex) + ' (' + escHtml(selectedItems[0].title) + ') কাজটি সম্পন্ন করেছি (' + escHtml(nowStr) + ')।</p>' +
+        ? '<p style="margin:0 0 8px 0;">আসসালামু আলাইকুম ' + escHtml(partnerName) + ',</p>' +
+          '<p style="margin:0 0 8px 0;">আশা করি আপনি ভালো আছেন। আপনাকে জানাতে চাই যে, আজ আমি ' + hiSpan(selectedItems[0].bnGenitive, selectedItems[0].colorHex, selectedItems[0].bgHex) + ' কাজটি সম্পন্ন করেছি (' + escHtml(nowStr) + ')।</p>' +
           (note ? '<p style="margin:0 0 8px 0;color:#475569;"><strong>নোট:</strong> ' + escHtml(note) + '</p>' : '') +
-          '<p style="margin:0;">পরের বার ' + hiSpan(selectedItems[0].bnTitle, selectedItems[0].colorHex, selectedItems[0].bgHex) + ' করার পালা তোমার!</p>'
-        : '<p style="margin:0 0 8px 0;">হ্যালো ' + escHtml(partnerName) + ',</p>' +
-          '<p style="margin:0 0 8px 0;">আমি আজকে নিচের কাজগুলো সম্পন্ন করেছি (' + escHtml(nowStr) + '):</p>' +
+          '<p style="margin:0 0 8px 0;">যেহেতু এবার আমি কাজটি করেছি, তাই পরবর্তীবার ' + hiSpan(selectedItems[0].bnGenitive, selectedItems[0].colorHex, selectedItems[0].bgHex) + ' দায়িত্বটি আপনার থাকবে। এ বিষয়ে আপনার সহযোগিতা কামনা করছি।</p>' +
+          '<p style="margin:0;">আপনাকে অনেক ধন্যবাদ।</p>'
+        : '<p style="margin:0 0 8px 0;">আসসালামু আলাইকুম ' + escHtml(partnerName) + ',</p>' +
+          '<p style="margin:0 0 8px 0;">আশা করি আপনি ভালো আছেন। আপনাকে জানাতে চাই যে, আজ আমি নিচের কাজগুলো সম্পন্ন করেছি (' + escHtml(nowStr) + '):</p>' +
           '<ul style="margin:0 0 10px 18px;padding:0;">' +
             selectedItems.map((i) => '<li style="margin:5px 0;">' + hiSpan(i.bnTitle, i.colorHex, i.bgHex) + ' <span style="color:#64748b;">(' + escHtml(i.title) + ')</span></li>').join('') +
           '</ul>' +
           (note ? '<p style="margin:0 0 8px 0;color:#475569;"><strong>নোট:</strong> ' + escHtml(note) + '</p>' : '') +
-          '<p style="margin:0;">পরের বার এই কাজগুলো করার পালা তোমার!</p>';
+          '<p style="margin:0 0 8px 0;">যেহেতু এবার আমি কাজগুলো করেছি, তাই পরবর্তীবার এই কাজগুলোর দায়িত্বটি আপনার থাকবে। এ বিষয়ে আপনার সহযোগিতা কামনা করছি।</p>' +
+          '<p style="margin:0;">আপনাকে অনেক ধন্যবাদ।</p>';
 
       const messageHtml =
         '<div style="font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;font-size:14px;line-height:1.65;color:#0f172a;">' +
           enHtml +
           '<hr style="border:none;border-top:1px solid #e2e8f0;margin:14px 0;" />' +
-          '<div style="font-size:12px;font-weight:700;color:#64748b;margin-bottom:6px;">বাংলা অনুবাদ</div>' +
+          '<div style="font-size:12px;font-weight:700;color:#64748b;margin-bottom:6px;">বাংলা অর্থ:</div>' +
           bnHtml +
           '<p style="margin:12px 0 0 0;color:#64748b;font-size:12px;">— ' + escHtml(actorName) + ' (FairShare)</p>' +
         '</div>';
@@ -390,12 +404,12 @@
       const boxEl = document.getElementById("previewBox");
       if (selected.length === 0) {
         countEl.textContent = "No tasks ticked";
-        boxEl.innerHTML = '<div class="sub">Jei box-e tick diben, sei kajer nam color-highlight kore English + বাংলা message ekhane dekha jabe (' + escHtml(CONFIG.emails[partner]) + ').</div>';
+        boxEl.innerHTML = '<div class="sub">Jei box-e tick diben, sei kajer nam color-highlight kore polite English + বাংলা অর্থ ekhane dekha jabe (' + escHtml(CONFIG.names[partner]) + ' — ' + escHtml(CONFIG.emails[partner]) + ').</div>';
         return;
       }
       countEl.textContent = selected.length + " task" + (selected.length > 1 ? "s" : "") + " selected";
       const note = document.getElementById("noteInput").value.trim();
-      const built = buildMessage(selected, note, new Date().toLocaleString());
+      const built = buildMessage(selected, note, formatPoliteDateTime());
       boxEl.innerHTML =
         '<div class="preview-subject">Subject: ' + escHtml(built.subject) + '</div>' +
         '<div class="preview-msg">' + built.messageHtml + '</div>';
@@ -415,7 +429,7 @@
       const titles = selectedChores.map((c) => c.title);
       const bnTitles = selectedChores.map((c) => c.bnTitle);
       const note = document.getElementById("noteInput").value.trim();
-      const nowStr = new Date().toLocaleString();
+      const nowStr = formatPoliteDateTime();
       const built = buildMessage(selectedChores, note, nowStr);
       const taskList = titles.join(", ");
 
@@ -529,7 +543,7 @@
                 '<div class="chore-meta">' +
                   '<span class="' + (isYourTurn ? 'turn-highlight' : '') + '">Next turn: ' + escHtml(turnName) + '</span>' +
                   ' · ' + escHtml(lastInfo) +
-                  ' · A: ' + c.countA + ' / B: ' + c.countB +
+                  ' · ' + escHtml(CONFIG.names.A) + ': ' + c.countA + ' / ' + escHtml(CONFIG.names.B) + ': ' + c.countB +
                 '</div>' +
               '</div>' +
             '</div>' +
