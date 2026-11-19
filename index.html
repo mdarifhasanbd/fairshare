@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FairShare — Expense Split & Email Notify</title>
+  <title>FairShare — Roommate Chore Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -12,176 +12,198 @@
       background: #f8fafc;
       color: #0f172a;
       line-height: 1.5;
-      padding: 24px 16px;
+      padding: 24px 16px 48px;
     }
-    .container { max-width: 820px; margin: 0 auto; }
+    .wrap { max-width: 780px; margin: 0 auto; }
     header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid #e2e8f0;
-    }
-    h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
-    .subtitle { font-size: 13px; color: #64748b; }
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-    .card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 18px;
-    }
-    .metric-label { font-size: 12px; color: #64748b; }
-    .metric-value { font-size: 22px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
-    .settlement-box {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      color: #1e3a8a;
-      border-radius: 10px;
-      padding: 14px 18px;
-      margin-bottom: 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 12px;
-      font-size: 14px;
-      font-weight: 600;
-    }
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      padding-bottom: 16px;
       margin-bottom: 20px;
+      border-bottom: 1px solid #e2e8f0;
     }
-    @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
-    h2 { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
-    .field { margin-bottom: 12px; }
-    label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px; }
-    input, select, textarea {
-      width: 100%;
-      padding: 9px 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      font-size: 14px;
-      font-family: inherit;
+    h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+    .sub { font-size: 13px; color: #64748b; }
+    .switcher {
+      display: inline-flex;
+      background: #e2e8f0;
+      padding: 4px;
+      border-radius: 9px;
+      gap: 4px;
+    }
+    .switcher button {
+      border: none;
+      background: transparent;
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+    }
+    .switcher button.active {
       background: #fff;
+      color: #0f172a;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
     }
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      overflow: hidden;
     }
-    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-    button {
-      padding: 9px 14px;
+    .stat { padding: 14px 16px; border-right: 1px solid #e2e8f0; }
+    .stat:last-child { border-right: none; }
+    .stat-label { font-size: 12px; color: #64748b; }
+    .stat-val { font-size: 20px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+    .card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+    .card-head {
+      padding: 14px 18px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .card-head h2 { font-size: 15px; font-weight: 600; }
+    .chore-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 18px;
+      border-bottom: 1px solid #f1f5f9;
+      flex-wrap: wrap;
+    }
+    .chore-row:last-child { border-bottom: none; }
+    .chore-left { display: flex; align-items: flex-start; gap: 12px; min-width: 200px; flex: 1; }
+    .chore-left input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      accent-color: #2563eb;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .chore-title { font-size: 15px; font-weight: 600; color: #0f172a; cursor: pointer; }
+    .chore-meta { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .turn-highlight { color: #2563eb; font-weight: 600; }
+    .btn {
       border: none;
       border-radius: 8px;
+      padding: 8px 14px;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.15s;
+      white-space: nowrap;
     }
     .btn-primary { background: #2563eb; color: #fff; }
     .btn-primary:hover { background: #1d4ed8; }
-    .btn-dark { background: #0f172a; color: #fff; }
-    .btn-dark:hover { background: #1e293b; }
-    .btn-ghost { background: #f1f5f9; color: #334155; }
-    .btn-ghost:hover { background: #e2e8f0; }
-    .btn-danger { background: transparent; color: #dc2626; padding: 4px 8px; font-size: 12px; }
-    .btn-danger:hover { background: #fef2f2; }
-    button:disabled { opacity: 0.55; cursor: not-allowed; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #f1f5f9; }
-    th { color: #64748b; font-weight: 600; font-size: 12px; }
-    .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
-    .empty { color: #94a3b8; font-size: 13px; padding: 16px 0; text-align: center; }
-    .status {
-      margin-top: 12px;
-      padding: 10px 12px;
+    .btn-outline { background: #f8fafc; color: #0f172a; border: 1px solid #cbd5e1; }
+    .btn-outline:hover { background: #f1f5f9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .batch-bar {
+      padding: 16px 18px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .batch-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+    .note-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 9px 12px;
+      border: 1px solid #cbd5e1;
       border-radius: 8px;
       font-size: 13px;
+      background: #fff;
+    }
+    .status {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 16px;
       display: none;
     }
     .status.ok { display: block; background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
     .status.err { display: block; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+    .log-item {
+      padding: 12px 18px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 13px;
+    }
+    .log-item:last-child { border-bottom: none; }
+    .log-meta { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .empty { padding: 20px 18px; font-size: 13px; color: #94a3b8; text-align: center; }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="wrap">
     <header>
       <div>
         <h1>FairShare</h1>
-        <div class="subtitle">Expense Splitter &amp; EmailJS Notification (Person A &amp; Person B)</div>
+        <div class="sub" id="activeBanner"></div>
       </div>
-      <div class="subtitle mono" id="emailsHeader"></div>
+      <div class="switcher" role="group" aria-label="Select who you are">
+        <button id="btnUserA" onclick="setUser('A')">I am Person A</button>
+        <button id="btnUserB" onclick="setUser('B')">I am Person B</button>
+      </div>
     </header>
-
-    <div class="summary-grid">
-      <div class="card">
-        <div class="metric-label">Total Shared</div>
-        <div class="metric-value" id="totalAmount">৳0.00</div>
-      </div>
-      <div class="card">
-        <div class="metric-label">Person A Paid</div>
-        <div class="metric-value" id="aPaid">৳0.00</div>
-      </div>
-      <div class="card">
-        <div class="metric-label">Person B Paid</div>
-        <div class="metric-value" id="bPaid">৳0.00</div>
-      </div>
-    </div>
-
-    <div class="settlement-box">
-      <span id="settlementText">All settled — ৳0.00 balance</span>
-      <div class="btn-row" style="margin-top:0">
-        <button class="btn-dark" id="sendBothBtn" onclick="sendReport('BOTH')">Email Report to Both</button>
-        <button class="btn-ghost" id="sendABtn" onclick="sendReport('A')">Email A</button>
-        <button class="btn-ghost" id="sendBBtn" onclick="sendReport('B')">Email B</button>
-      </div>
-    </div>
 
     <div id="statusBox" class="status"></div>
 
-    <div class="grid-2">
-      <div class="card">
-        <h2>Add Expense</h2>
-        <form id="expenseForm">
-          <div class="field">
-            <label for="desc">Description</label>
-            <input id="desc" type="text" placeholder="e.g. Groceries, Rent, Dinner" required />
-          </div>
-          <div class="field">
-            <label for="amount">Amount (৳)</label>
-            <input id="amount" type="number" step="0.01" min="0.01" placeholder="0.00" required />
-          </div>
-          <div class="field">
-            <label for="paidBy">Paid By</label>
-            <select id="paidBy">
-              <option value="A">Person A (hmarif315@gmail.com)</option>
-              <option value="B">Person B (mdarifhasan171@gmail.com)</option>
-            </select>
-          </div>
-          <div class="btn-row">
-            <button type="submit" class="btn-primary">Add Expense</button>
-            <button type="button" class="btn-ghost" onclick="clearAll()">Clear All</button>
-          </div>
-        </form>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Person A Done</div>
+        <div class="stat-val" id="statA">0</div>
       </div>
+      <div class="stat">
+        <div class="stat-label">Person B Done</div>
+        <div class="stat-val" id="statB">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Total Logged</div>
+        <div class="stat-val" id="statTotal">0</div>
+      </div>
+    </div>
 
-      <div class="card">
-        <h2>Expense History</h2>
-        <div id="listContainer"></div>
+    <div class="card">
+      <div class="card-head">
+        <h2>Daily Chores</h2>
+        <span class="sub">Click Done for 1 task, or check multiple tasks below</span>
       </div>
+      <div id="choreList"></div>
+      <div class="batch-bar">
+        <div class="batch-row">
+          <input id="noteInput" class="note-input" type="text" placeholder="Optional note (e.g. Left extra water bottle on the table)" />
+          <button id="batchBtn" class="btn btn-primary" onclick="submitChecked()" disabled>
+            Send Checked Tasks (0)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>Recent Activity</h2>
+        <button class="btn btn-outline" style="padding:5px 10px;font-size:12px" onclick="clearLogs()">Clear History</button>
+      </div>
+      <div id="logList"></div>
     </div>
   </div>
 
@@ -194,158 +216,220 @@
       emails: {
         A: "hmarif315@gmail.com",
         B: "mdarifhasan171@gmail.com"
+      },
+      names: {
+        A: "Person A",
+        B: "Person B"
       }
     };
 
     emailjs.init({ publicKey: CONFIG.publicKey });
 
-    const STORAGE_KEY = "fairshare_expenses_v1";
-    let expenses = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    const DEFAULT_CHORES = [
+      { id: "trash", title: "Take Out the Trash", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
+      { id: "sweep", title: "Sweep the Room", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
+      { id: "basin", title: "Clean the Basin", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
+      { id: "washroom", title: "Clean the Washroom", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 },
+      { id: "water", title: "Bring Water", nextTurn: "A", lastDoneBy: null, lastDoneAt: null, countA: 0, countB: 0 }
+    ];
 
-    document.getElementById("emailsHeader").textContent =
-      "A: " + CONFIG.emails.A + " · B: " + CONFIG.emails.B;
+    let activeUser = localStorage.getItem("fs_user") === "B" ? "B" : "A";
+    let chores = JSON.parse(localStorage.getItem("fs_chores") || "null") || DEFAULT_CHORES;
+    let logs = JSON.parse(localStorage.getItem("fs_logs") || "[]");
+    let checkedIds = new Set();
+    let busy = false;
 
-    function save() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
+    function partnerOf(u) { return u === "A" ? "B" : "A"; }
+    function saveState() {
+      localStorage.setItem("fs_user", activeUser);
+      localStorage.setItem("fs_chores", JSON.stringify(chores));
+      localStorage.setItem("fs_logs", JSON.stringify(logs.slice(0, 100)));
     }
 
-    function fmt(n) {
-      return "৳" + Number(n || 0).toFixed(2);
+    function showStatus(text, isErr) {
+      const el = document.getElementById("statusBox");
+      el.textContent = text;
+      el.className = "status " + (isErr ? "err" : "ok");
     }
 
-    function getSummary() {
-      let total = 0, aPaid = 0, bPaid = 0;
-      for (const e of expenses) {
-        total += e.amount;
-        if (e.paidBy === "A") aPaid += e.amount;
-        else bPaid += e.amount;
-      }
-      const share = total / 2;
-      const diff = aPaid - share; // >0 means B owes A; <0 means A owes B
-      let settlement = "All settled — ৳0.00 balance";
-      if (diff > 0.005) settlement = "Person B owes Person A " + fmt(diff);
-      else if (diff < -0.005) settlement = "Person A owes Person B " + fmt(Math.abs(diff));
-      return { total, aPaid, bPaid, share, diff, settlement };
-    }
-
-    function render() {
-      const s = getSummary();
-      document.getElementById("totalAmount").textContent = fmt(s.total);
-      document.getElementById("aPaid").textContent = fmt(s.aPaid);
-      document.getElementById("bPaid").textContent = fmt(s.bPaid);
-      document.getElementById("settlementText").textContent = s.settlement;
-
-      const container = document.getElementById("listContainer");
-      if (expenses.length === 0) {
-        container.innerHTML = '<div class="empty">No expenses added yet.</div>';
-        return;
-      }
-
-      let rows = expenses.map((e) => `
-        <tr>
-          <td>
-            <div style="font-weight:600">${escapeHtml(e.desc)}</div>
-            <div style="font-size:11px;color:#64748b">Paid by ${e.paidBy} · ${e.date}</div>
-          </td>
-          <td class="num">${fmt(e.amount)}</td>
-          <td style="text-align:right">
-            <button class="btn-danger" onclick="removeExpense('${e.id}')">Remove</button>
-          </td>
-        </tr>
-      `).join("");
-
-      container.innerHTML = `
-        <table>
-          <thead><tr><th>Item</th><th class="num">Amount</th><th></th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      `;
-    }
-
-    function escapeHtml(str) {
-      return String(str).replace(/[&<>"']/g, (m) => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-      }[m]));
-    }
-
-    function showStatus(msg, isError) {
-      const box = document.getElementById("statusBox");
-      box.textContent = msg;
-      box.className = "status " + (isError ? "err" : "ok");
-    }
-
-    document.getElementById("expenseForm").addEventListener("submit", function (ev) {
-      ev.preventDefault();
-      const desc = document.getElementById("desc").value.trim();
-      const amount = parseFloat(document.getElementById("amount").value);
-      const paidBy = document.getElementById("paidBy").value;
-      if (!desc || isNaN(amount) || amount <= 0) return;
-
-      expenses.unshift({
-        id: String(Date.now()),
-        desc,
-        amount,
-        paidBy,
-        date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })
-      });
-      save();
-      render();
-      this.reset();
-    });
-
-    window.removeExpense = function (id) {
-      expenses = expenses.filter((e) => e.id !== id);
-      save();
+    window.setUser = function (u) {
+      activeUser = u;
+      saveState();
       render();
     };
 
-    window.clearAll = function () {
-      expenses = [];
-      save();
+    window.toggleCheck = function (id) {
+      if (checkedIds.has(id)) checkedIds.delete(id);
+      else checkedIds.add(id);
       render();
-      showStatus("All expenses cleared.", false);
     };
 
-    window.sendReport = async function (target) {
-      const s = getSummary();
-      const channels = target === "BOTH" ? ["A", "B"] : [target];
-      const lines = expenses.length
-        ? expenses.map((e) => `- ${e.desc}: ${fmt(e.amount)} (Paid by ${e.paidBy})`).join("\n")
-        : "No expenses recorded yet.";
+    async function dispatchTasks(taskIds) {
+      if (busy || taskIds.length === 0) return;
+      busy = true;
+      render();
+
+      const partner = partnerOf(activeUser);
+      const actorName = CONFIG.names[activeUser];
+      const partnerName = CONFIG.names[partner];
+      const toEmail = CONFIG.emails[partner];
+      const replyTo = CONFIG.emails[activeUser];
+      const selectedChores = chores.filter((c) => taskIds.includes(c.id));
+      const titles = selectedChores.map((c) => c.title);
+      const note = document.getElementById("noteInput").value.trim();
+      const nowStr = new Date().toLocaleString();
+
+      const subject = titles.length === 1
+        ? "FairShare: " + titles[0] + " done — Next it's your turn!"
+        : "FairShare: " + titles.length + " tasks completed — Next it's your turn!";
+
+      const taskLines = titles.length === 1
+        ? "Completed Task: " + titles[0]
+        : "Completed Tasks:\n" + titles.map((t, i) => (i + 1) + ". " + t).join("\n");
 
       const message =
-        `FairShare Summary\n` +
-        `Total: ${fmt(s.total)}\n` +
-        `Person A Paid: ${fmt(s.aPaid)}\n` +
-        `Person B Paid: ${fmt(s.bPaid)}\n` +
-        `Settlement: ${s.settlement}\n\n` +
-        `Items:\n${lines}`;
-
-      const btns = ["sendBothBtn", "sendABtn", "sendBBtn"].map((id) => document.getElementById(id));
-      btns.forEach((b) => (b.disabled = true));
+        "Hi " + partnerName + ",\n\n" +
+        actorName + " has completed the following on " + nowStr + ":\n\n" +
+        taskLines + "\n" +
+        (note ? "\nNote: " + note + "\n" : "") +
+        "\nNext time, it's your turn!\n\n— FairShare";
 
       try {
-        for (const ch of channels) {
-          const toEmail = CONFIG.emails[ch];
-          await emailjs.send(CONFIG.serviceId, CONFIG.templateId, {
-            to_email: toEmail,
-            email: toEmail,
-            to_name: "Person " + ch,
-            from_name: "FairShare",
-            subject: "FairShare Balance Summary",
-            title: "FairShare Balance Summary",
-            message: message,
-            time: new Date().toLocaleString()
-          });
-        }
-        showStatus("Email sent successfully to " + channels.map((c) => CONFIG.emails[c]).join(" & "), false);
+        await emailjs.send(CONFIG.serviceId, CONFIG.templateId, {
+          to_email: toEmail,
+          email: toEmail,
+          to_name: partnerName,
+          from_name: actorName,
+          name: actorName,
+          reply_to: replyTo,
+          subject: subject,
+          title: subject,
+          chore: titles.join(", "),
+          tasks: titles.join(", "),
+          next_turn: partnerName,
+          message: message,
+          time: nowStr
+        });
+
+        chores = chores.map((c) => {
+          if (!taskIds.includes(c.id)) return c;
+          return {
+            ...c,
+            nextTurn: partner,
+            lastDoneBy: activeUser,
+            lastDoneAt: new Date().toISOString(),
+            countA: c.countA + (activeUser === "A" ? 1 : 0),
+            countB: c.countB + (activeUser === "B" ? 1 : 0)
+          };
+        });
+
+        logs.unshift({
+          time: nowStr,
+          by: actorName,
+          notified: toEmail,
+          tasks: titles,
+          note: note,
+          ok: true
+        });
+
+        checkedIds.clear();
+        document.getElementById("noteInput").value = "";
+        saveState();
+        showStatus("Email sent to " + partnerName + " (" + toEmail + "): Next it's their turn!", false);
       } catch (err) {
-        const detail = (err && (err.text || err.message)) || "Check your EmailJS template fields.";
-        showStatus("EmailJS Error: " + detail, true);
+        const msg = (err && (err.text || err.message)) || "EmailJS failed to send.";
+        logs.unshift({
+          time: nowStr,
+          by: actorName,
+          notified: toEmail,
+          tasks: titles,
+          note: note,
+          ok: false,
+          err: msg
+        });
+        saveState();
+        showStatus("EmailJS Error: " + msg, true);
       } finally {
-        btns.forEach((b) => (b.disabled = false));
+        busy = false;
+        render();
       }
+    }
+
+    window.markSingleDone = function (id) {
+      dispatchTasks([id]);
     };
+
+    window.submitChecked = function () {
+      dispatchTasks(Array.from(checkedIds));
+    };
+
+    window.clearLogs = function () {
+      logs = [];
+      saveState();
+      render();
+    };
+
+    function render() {
+      const partner = partnerOf(activeUser);
+      document.getElementById("btnUserA").className = activeUser === "A" ? "active" : "";
+      document.getElementById("btnUserB").className = activeUser === "B" ? "active" : "";
+      document.getElementById("activeBanner").textContent =
+        "Notifying " + CONFIG.names[partner] + " (" + CONFIG.emails[partner] + ")";
+
+      const sumA = chores.reduce((acc, c) => acc + c.countA, 0);
+      const sumB = chores.reduce((acc, c) => acc + c.countB, 0);
+      document.getElementById("statA").textContent = sumA;
+      document.getElementById("statB").textContent = sumB;
+      document.getElementById("statTotal").textContent = sumA + sumB;
+
+      document.getElementById("choreList").innerHTML = chores.map((c) => {
+        const checked = checkedIds.has(c.id) ? "checked" : "";
+        const lastInfo = c.lastDoneBy
+          ? "Last done by " + CONFIG.names[c.lastDoneBy] + " · " + new Date(c.lastDoneAt).toLocaleDateString()
+          : "Not logged yet";
+        const turnName = CONFIG.names[c.nextTurn];
+        const isYourTurn = c.nextTurn === activeUser;
+        return (
+          '<div class="chore-row">' +
+            '<div class="chore-left">' +
+              '<input type="checkbox" id="chk_' + c.id + '" ' + checked + ' onchange="toggleCheck(\'' + c.id + '\')" />' +
+              '<div>' +
+                '<label class="chore-title" for="chk_' + c.id + '">' + c.title + '</label>' +
+                '<div class="chore-meta">' +
+                  '<span class="' + (isYourTurn ? 'turn-highlight' : '') + '">Next turn: ' + turnName + '</span>' +
+                  ' · ' + lastInfo +
+                  ' · A: ' + c.countA + ' / B: ' + c.countB +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+            '<button class="btn btn-outline" ' + (busy ? 'disabled' : '') + ' onclick="markSingleDone(\'' + c.id + '\')">' +
+              (busy ? 'Sending...' : 'Done & Notify') +
+            '</button>' +
+          '</div>'
+        );
+      }).join("");
+
+      const batchBtn = document.getElementById("batchBtn");
+      batchBtn.disabled = busy || checkedIds.size === 0;
+      batchBtn.textContent = busy
+        ? "Sending..."
+        : "Send Checked Tasks (" + checkedIds.size + ") & Notify " + CONFIG.names[partner];
+
+      const logEl = document.getElementById("logList");
+      if (logs.length === 0) {
+        logEl.innerHTML = '<div class="empty">No chores logged yet. Click "Done & Notify" on any task above.</div>';
+      } else {
+        logEl.innerHTML = logs.slice(0, 15).map((l) => (
+          '<div class="log-item">' +
+            '<div><strong>' + l.by + '</strong> completed: ' + l.tasks.join(", ") + '</div>' +
+            '<div class="log-meta">' +
+              l.time + ' · Notified ' + l.notified + ' · ' +
+              (l.ok ? '<span style="color:#15803d;font-weight:600">Sent</span>' : '<span style="color:#dc2626;font-weight:600">Failed: ' + (l.err || '') + '</span>') +
+            '</div>' +
+          '</div>'
+        )).join("");
+      }
+    }
 
     render();
   </script>
