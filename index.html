@@ -88,6 +88,7 @@
       border-bottom: 1px solid #f1f5f9;
       flex-wrap: wrap;
     }
+    .chore-row.checked { background: #eff6ff; }
     .chore-row:last-child { border-bottom: none; }
     .chore-left { display: flex; align-items: flex-start; gap: 12px; min-width: 200px; flex: 1; }
     .chore-left input[type="checkbox"] {
@@ -133,6 +134,21 @@
       font-size: 13px;
       background: #fff;
     }
+    .preview-box {
+      padding: 16px 18px;
+      font-size: 13px;
+    }
+    .preview-subject { font-weight: 600; color: #0f172a; margin-bottom: 8px; }
+    .preview-msg {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      white-space: pre-wrap;
+      color: #334155;
+      font-size: 13px;
+      line-height: 1.55;
+    }
     .status {
       padding: 12px 16px;
       border-radius: 8px;
@@ -160,8 +176,8 @@
         <div class="sub" id="activeBanner"></div>
       </div>
       <div class="switcher" role="group" aria-label="Select who you are">
-        <button id="btnUserA" onclick="setUser('A')">I am Person A</button>
-        <button id="btnUserB" onclick="setUser('B')">I am Person B</button>
+        <button id="btnUserA" onclick="setUser('A')">Arif</button>
+        <button id="btnUserB" onclick="setUser('B')">Ishak</button>
       </div>
     </header>
 
@@ -169,11 +185,11 @@
 
     <div class="stats">
       <div class="stat">
-        <div class="stat-label">Person A Done</div>
+        <div class="stat-label">Arif Done</div>
         <div class="stat-val" id="statA">0</div>
       </div>
       <div class="stat">
-        <div class="stat-label">Person B Done</div>
+        <div class="stat-label">Ishak Done</div>
         <div class="stat-val" id="statB">0</div>
       </div>
       <div class="stat">
@@ -185,17 +201,25 @@
     <div class="card">
       <div class="card-head">
         <h2>Daily Chores</h2>
-        <span class="sub">Click Done for 1 task, or check multiple tasks below</span>
+        <span class="sub">Tick boxes to build the message live, or click Done &amp; Notify</span>
       </div>
       <div id="choreList"></div>
       <div class="batch-bar">
         <div class="batch-row">
-          <input id="noteInput" class="note-input" type="text" placeholder="Optional note (e.g. Left extra water bottle on the table)" />
+          <input id="noteInput" class="note-input" type="text" oninput="renderPreview()" placeholder="Optional note (e.g. Left extra water bottle on the table)" />
           <button id="batchBtn" class="btn btn-primary" onclick="submitChecked()" disabled>
             Send Checked Tasks (0)
           </button>
         </div>
       </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>Live Message Preview</h2>
+        <span class="sub" id="previewCount">No tasks ticked</span>
+      </div>
+      <div class="preview-box" id="previewBox"></div>
     </div>
 
     <div class="card">
@@ -214,12 +238,12 @@
       templateId: "template_ol1efuh",
 
       emails: {
-        A: "hmarif315@gmail.com",
-        B: "mdarifhasan171@gmail.com"
+        Arif: "hmarif315@gmail.com",
+        Ishak: "mdarifhasan171@gmail.com"
       },
       names: {
-        A: "Person A",
-        B: "Person B"
+        Arif: "Arif",
+        Ishak: "Ishak"
       }
     };
 
@@ -252,6 +276,31 @@
       el.className = "status " + (isErr ? "err" : "ok");
     }
 
+    function buildMessage(titles, note, nowStr) {
+      const partner = partnerOf(activeUser);
+      const actorName = CONFIG.names[activeUser];
+      const partnerName = CONFIG.names[partner];
+      const joined = titles.length <= 2 ? titles.join(" & ") : titles.slice(0, 2).join(", ") + " +" + (titles.length - 2) + " more";
+      const subject = titles.length === 1
+        ? "FairShare: " + titles[0] + " completed — Next it's your turn!"
+        : "FairShare: " + joined + " completed — Next it's your turn!";
+
+      const message = titles.length === 1
+        ? "Hi " + partnerName + ",\n\n" +
+          "I have completed \"" + titles[0] + "\" today (" + nowStr + ").\n" +
+          (note ? "Note: " + note + "\n" : "") +
+          "Next time, it's your turn for " + titles[0] + "!\n\n" +
+          "— " + actorName + " (FairShare)"
+        : "Hi " + partnerName + ",\n\n" +
+          "I have completed the following tasks today (" + nowStr + "):\n" +
+          titles.map((t) => "- " + t).join("\n") + "\n" +
+          (note ? "\nNote: " + note + "\n" : "") +
+          "\nNext time, it's your turn for these tasks!\n\n" +
+          "— " + actorName + " (FairShare)";
+
+      return { subject, message };
+    }
+
     window.setUser = function (u) {
       activeUser = u;
       saveState();
@@ -262,6 +311,24 @@
       if (checkedIds.has(id)) checkedIds.delete(id);
       else checkedIds.add(id);
       render();
+    };
+
+    window.renderPreview = function () {
+      const selected = chores.filter((c) => checkedIds.has(c.id)).map((c) => c.title);
+      const partner = partnerOf(activeUser);
+      const countEl = document.getElementById("previewCount");
+      const boxEl = document.getElementById("previewBox");
+      if (selected.length === 0) {
+        countEl.textContent = "No tasks ticked";
+        boxEl.innerHTML = '<div class="sub">Tick any chore box above to see the completion message for ' + CONFIG.emails[partner] + '.</div>';
+        return;
+      }
+      countEl.textContent = selected.length + " task" + (selected.length > 1 ? "s" : "") + " selected";
+      const note = document.getElementById("noteInput").value.trim();
+      const built = buildMessage(selected, note, new Date().toLocaleString());
+      boxEl.innerHTML =
+        '<div class="preview-subject">Subject: ' + built.subject.replace(/</g, "&lt;") + '</div>' +
+        '<div class="preview-msg">' + built.message.replace(/</g, "&lt;") + '</div>';
     };
 
     async function dispatchTasks(taskIds) {
@@ -278,21 +345,8 @@
       const titles = selectedChores.map((c) => c.title);
       const note = document.getElementById("noteInput").value.trim();
       const nowStr = new Date().toLocaleString();
-
-      const subject = titles.length === 1
-        ? "FairShare: " + titles[0] + " done — Next it's your turn!"
-        : "FairShare: " + titles.length + " tasks completed — Next it's your turn!";
-
-      const taskLines = titles.length === 1
-        ? "Completed Task: " + titles[0]
-        : "Completed Tasks:\n" + titles.map((t, i) => (i + 1) + ". " + t).join("\n");
-
-      const message =
-        "Hi " + partnerName + ",\n\n" +
-        actorName + " has completed the following on " + nowStr + ":\n\n" +
-        taskLines + "\n" +
-        (note ? "\nNote: " + note + "\n" : "") +
-        "\nNext time, it's your turn!\n\n— FairShare";
+      const built = buildMessage(titles, note, nowStr);
+      const taskList = titles.join(", ");
 
       try {
         await emailjs.send(CONFIG.serviceId, CONFIG.templateId, {
@@ -302,12 +356,23 @@
           from_name: actorName,
           name: actorName,
           reply_to: replyTo,
-          subject: subject,
-          title: subject,
-          chore: titles.join(", "),
-          tasks: titles.join(", "),
+          from_email: replyTo,
+          subject: built.subject,
+          title: built.subject,
+          message: built.message,
+          msg: built.message,
+          body: built.message,
+          text: built.message,
+          task: taskList,
+          tasks: taskList,
+          task_name: taskList,
+          chore: taskList,
+          chores: taskList,
+          completed_tasks: taskList,
+          completed_by: actorName,
+          done_by: actorName,
           next_turn: partnerName,
-          message: message,
+          next_person: partnerName,
           time: nowStr
         });
 
@@ -335,7 +400,7 @@
         checkedIds.clear();
         document.getElementById("noteInput").value = "";
         saveState();
-        showStatus("Email sent to " + partnerName + " (" + toEmail + "): Next it's their turn!", false);
+        showStatus("Email sent to " + partnerName + " (" + toEmail + "): " + taskList + " completed!", false);
       } catch (err) {
         const msg = (err && (err.text || err.message)) || "EmailJS failed to send.";
         logs.unshift({
@@ -383,16 +448,16 @@
       document.getElementById("statTotal").textContent = sumA + sumB;
 
       document.getElementById("choreList").innerHTML = chores.map((c) => {
-        const checked = checkedIds.has(c.id) ? "checked" : "";
+        const isChecked = checkedIds.has(c.id);
         const lastInfo = c.lastDoneBy
           ? "Last done by " + CONFIG.names[c.lastDoneBy] + " · " + new Date(c.lastDoneAt).toLocaleDateString()
           : "Not logged yet";
         const turnName = CONFIG.names[c.nextTurn];
         const isYourTurn = c.nextTurn === activeUser;
         return (
-          '<div class="chore-row">' +
+          '<div class="chore-row' + (isChecked ? ' checked' : '') + '">' +
             '<div class="chore-left">' +
-              '<input type="checkbox" id="chk_' + c.id + '" ' + checked + ' onchange="toggleCheck(\'' + c.id + '\')" />' +
+              '<input type="checkbox" id="chk_' + c.id + '" ' + (isChecked ? 'checked' : '') + ' onchange="toggleCheck(\'' + c.id + '\')" />' +
               '<div>' +
                 '<label class="chore-title" for="chk_' + c.id + '">' + c.title + '</label>' +
                 '<div class="chore-meta">' +
@@ -415,9 +480,11 @@
         ? "Sending..."
         : "Send Checked Tasks (" + checkedIds.size + ") & Notify " + CONFIG.names[partner];
 
+      renderPreview();
+
       const logEl = document.getElementById("logList");
       if (logs.length === 0) {
-        logEl.innerHTML = '<div class="empty">No chores logged yet. Click "Done & Notify" on any task above.</div>';
+        logEl.innerHTML = '<div class="empty">No chores logged yet. Tick a task or click "Done & Notify".</div>';
       } else {
         logEl.innerHTML = logs.slice(0, 15).map((l) => (
           '<div class="log-item">' +
